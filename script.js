@@ -16,48 +16,47 @@ const toastCloseBtn = document.querySelector('[data-toast-close]');
 
 toastCloseBtn.addEventListener('click', function() {
     notificationToast.classList.add('closed');
+})
+
+//Closing or Opening Mobile Menu 
+const mobileMenuOpenBtn = document.querySelectorAll('[data-mobile-menu-open-btn]');
+const mobileMenu = document.querySelectorAll('[data-mobile-menu]');
+const mobileMenuCloseBtn = document.querySelectorAll('[data-mobile-menu-close-btn]');
+const overlay = document.querySelector('[data-overlay]');
+
+for (let i = 0; i < mobileMenuOpenBtn.length; i++) {
+
+    const mobileMenuCloseFunc = function () {
+        mobileMenu[i].classList.remove('active');
+        overlay.classList.remove('active');
+    }
+
+    mobileMenuOpenBtn[i].addEventListener('click', function () {
+        mobileMenu[i].classList.add('active');
+        overlay.classList.add('active');
     })
 
-    //Closing or Opening Mobile Menu 
-    const mobileMenuOpenBtn = document.querySelectorAll('[data-mobile-menu-open-btn]');
-    const mobileMenu = document.querySelectorAll('[data-mobile-menu]');
-    const mobileMenuCloseBtn = document.querySelectorAll('[data-mobile-menu-close-btn]');
-    const overlay = document.querySelector('[data-overlay]');
+    mobileMenuCloseBtn[i].addEventListener('click', mobileMenuCloseFunc);
+    overlay.addEventListener('click', mobileMenuCloseFunc);
+}
 
-    for (let i = 0; i < mobileMenuOpenBtn.length; i++) {
+//Accordion Options
+const accordionBtn = document.querySelectorAll('[data-accordion-btn]');
+const accordion = document.querySelectorAll('[data-accordion]');
 
-        const mobileMenuCloseFunc = function () {
-                mobileMenu[i].classList.remove('active');
-                        overlay.classList.remove('active');
-                            }
+for (let i = 0; i < accordion.length; i++) {
+    accordionBtn[i].addEventListener('click', function () {
+        const clickedBtn = this.nextElementSibling.classList.contains('active');
 
-                                mobileMenuOpenBtn[i].addEventListener('click', function () {
-                                        mobileMenu[i].classList.add('active');
-                                                overlay.classList.add('active');
-                                                    })
+        for (let i = 0; i < accordion.length; i++) {
+            if (clickedBtn) break;
+            if (accordion[i].classList.contains('active')) {
+                accordion[i].classList.remove('active');
+                accordionBtn[i].classList.remove('active');
+            }
+        }
 
-                                                        mobileMenuCloseBtn[i].addEventListener('click', mobileMenuCloseFunc);
-                                                            overlay.addEventListener('click', mobileMenuCloseFunc);
-                                                            }
-
-                                                            //Accordion Options
-                                                            const accordionBtn = document.querySelectorAll('[data-accordion-btn]');
-                                                            const accordion = document.querySelectorAll('[data-accordion]');
-
-                                                            for (let i = 0; i < accordion.length; i++) {
-                                                                accordionBtn[i].addEventListener('click', function () {
-                                                                        const clickedBtn = this.nextElementSibling.classList.contains('active');
-
-                                                                                for (let i = 0; i < accordion.length; i++) {
-                                                                                            if (clickedBtn) break;
-                                                                                                        if (accordion[i].classList.contains('active')) {
-                                                                                                                        accordion[i].classList.remove('active');
-                                                                                                                                        accordionBtn[i].classList.remove('active');
-                                                                                                                                                    }
-                                                                                                                                                            }
-
-                                                                                                                                                                    this.nextElementSibling.classList.toggle('active');
-                                                                                                                                                                            this.classList.toggle('active');
-                                                                                                                                                                                })
-                                                                                                                                                                                }
-                                                                                                                                                                                
+        this.nextElementSibling.classList.toggle('active');
+        this.classList.toggle('active');
+    })
+}
