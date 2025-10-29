@@ -2,792 +2,646 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Admin Panel - UC Earn App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RN WR2 - Earning & Social Media App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Adsterra Ad Script -->
-    <script async src="https://ads.adsterra.com/serve/AhJ1bXBzLWFkLTIwMjQtMDEvOTQ5MDQ2"></script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-</head>
-<body>
-    <div id="loading">
-        <i class="fas fa-spinner fa-spin"></i> Loading...
-    </div>
-
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fas fa-shield-alt"></i>
-                <h2>Admin Panel</h2>
-            </div>
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <nav>
-                <a href="#" class="nav-item active" data-section="dashboard">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="#" class="nav-item" data-section="users">
-                    <i class="fas fa-users"></i> Users
-                </a>
-                <a href="#" class="nav-item" data-section="transactions">
-                    <i class="fas fa-exchange-alt"></i> Transactions
-                </a>
-                <a href="#" class="nav-item" data-section="withdrawals">
-                    <i class="fas fa-rupee-sign"></i> Withdrawals
-                </a>
-                <a href="#" class="nav-item" data-section="uc-purchases">
-                    <i class="fas fa-gem"></i> UC Purchases
-                </a>
-                <a href="#" class="nav-item" data-section="settings">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-                <a href="#" class="nav-item" data-section="logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <header>
-                <h1>UC Earn App Admin</h1>
-                <div class="user-info">
-                    <span id="adminEmail">Admin</span>
-                    <button class="btn btn-accent" id="refreshData">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-            </header>
-
-            <!-- Dashboard Section -->
-            <section id="dashboard" class="admin-section active">
-                <div class="card">
-                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <i class="fas fa-users"></i>
-                            <h4>Total Users</h4>
-                            <p id="totalUsers">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-coins"></i>
-                            <h4>Total Balance</h4>
-                            <p id="totalBalance">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-rupee-sign"></i>
-                            <h4>Pending Withdrawals</h4>
-                            <p id="pendingWithdrawals">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-gem"></i>
-                            <h4>Pending UC Requests</h4>
-                            <p id="pendingUcRequests">0</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Users Section -->
-            <section id="users" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-users"></i> User Management</h3>
-                    <div class="search-bar">
-                        <input type="text" id="userSearch" placeholder="Search by User ID or Name">
-                        <button class="btn btn-primary" id="searchUser"><i class="fas fa-search"></i></button>
-                    </div>
-                    <div class="table-container">
-                        <table id="usersTable">
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Balance</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Transactions Section -->
-            <section id="transactions" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-exchange-alt"></i> Transaction History</h3>
-                    <div class="table-container">
-                        <table id="transactionsTable">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>User ID</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>Type</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactionsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Withdrawals Section -->
-            <section id="withdrawals" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-rupee-sign"></i> Withdrawal Requests</h3>
-                    <div class="table-container">
-                        <table id="withdrawalsTable">
-                            <thead>
-                                <tr>
-                                    <th>Request ID</th>
-                                    <th>Username</th>
-                                    <th>UPI ID</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="withdrawalsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- UC Purchases Section -->
-            <section id="uc-purchases" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-gem"></i> UC Purchase Requests</h3>
-                    <div class="table-container">
-                        <table id="ucPurchasesTable">
-                            <thead>
-                                <tr>
-                                    <th>Request ID</th>
-                                    <th>User ID</th>
-                                    <th>Game ID</th>
-                                    <th>UC Amount</th>
-                                    <th>Coin Cost</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ucPurchasesTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Settings Section -->
-            <section id="settings" class="admin-section">
-                <div class="card">
-                    <h3><i class="fas fa-cog"></i> Settings</h3>
-                    <div class="form-group">
-                        <label for="minWithdrawal">Minimum Withdrawal (Balance)</label>
-                        <input type="number" id="minWithdrawal" min="0">
-                        <button class="btn btn-primary" id="saveMinWithdrawal">Save</button>
-                    </div>
-                    <div class="form-group">
-                        <label for="ucRate">UC to Balance Rate (e.g., 10 balance = 1 UC)</label>
-                        <input type="number" id="ucRate" min="1" step="1">
-                        <button class="btn btn-primary" id="saveUcRate">Save</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <script>
-        // Firebase Configuration (Replace with your config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyD6EXA7D77rQDQEohB52BvTYimFeTEaAho",
-            authDomain: "rn-gfx-tool.firebaseapp.com",
-            databaseURL: "https://rn-gfx-tool-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "rn-gfx-tool",
-            storageBucket: "rn-gfx-tool.appspot.com",
-            messagingSenderId: "163149358541",
-            appId: "1:163149358541:web:2ef6d22fcd23e77ee09084"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
-
-        const loadingOverlay = document.getElementById('loading');
-        const sidebar = document.querySelector('.sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const navItems = document.querySelectorAll('.nav-item');
-        const adminSections = document.querySelectorAll('.admin-section');
-        const adminEmail = document.getElementById('adminEmail');
-        const refreshData = document.getElementById('refreshData');
-        const userSearch = document.getElementById('userSearch');
-        const searchUser = document.getElementById('searchUser');
-        const usersTableBody = document.getElementById('usersTableBody');
-        const transactionsTableBody = document.getElementById('transactionsTableBody');
-        const withdrawalsTableBody = document.getElementById('withdrawalsTableBody');
-        const ucPurchasesTableBody = document.getElementById('ucPurchasesTableBody');
-        const totalUsers = document.getElementById('totalUsers');
-        const totalBalance = document.getElementById('totalBalance'); // Updated from totalCoins
-        const pendingWithdrawals = document.getElementById('pendingWithdrawals');
-        const pendingUcRequests = document.getElementById('pendingUcRequests');
-        const minWithdrawal = document.getElementById('minWithdrawal');
-        const saveMinWithdrawal = document.getElementById('saveMinWithdrawal');
-        const ucRate = document.getElementById('ucRate');
-        const saveUcRate = document.getElementById('saveUcRate');
-
-        let adminId = null;
-
-        window.onload = function() {
-            // Initialize Adsterra Ads
-            window.adsterra = window.adsterra || [];
-            adsterra.push({ zone_id: 949046, container: 'adsterra-admin' });
-
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    adminId = user.uid;
-                    adminEmail.textContent = user.email;
-                    loadingOverlay.style.display = 'none';
-                    loadDashboard();
-                    listenToData();
-                } else {
-                    window.location.href = 'index.html'; // Redirect to login if not admin
-                }
-            });
-
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const section = item.getAttribute('data-section');
-                    navItems.forEach(i => i.classList.remove('active'));
-                    adminSections.forEach(s => s.classList.remove('active'));
-                    item.classList.add('active');
-                    document.getElementById(section).classList.add('active');
-                    if (section === 'users') loadUsers();
-                    else if (section === 'transactions') loadTransactions();
-                    else if (section === 'withdrawals') loadWithdrawals();
-                    else if (section === 'uc-purchases') loadUcPurchases();
-                    else if (section === 'settings') loadSettings();
-                });
-            });
-
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-                document.querySelector('.main-content').classList.toggle('sidebar-collapsed');
-            });
-
-            refreshData.addEventListener('click', loadDashboard);
-            searchUser.addEventListener('click', searchUsers);
-            saveMinWithdrawal.addEventListener('click', saveMinWithdrawalSetting);
-            saveUcRate.addEventListener('click', saveUcRateSetting);
-        };
-
-        function listenToData() {
-            database.ref('users').on('value', snapshot => {
-                const users = snapshot.val() || {};
-                totalUsers.textContent = Object.keys(users).length;
-                totalBalance.textContent = Object.values(users).reduce((sum, user) => sum + (parseInt(user.balance) || 0), 0); // Updated to balance
-            });
-            database.ref('requests/withdrawals').on('value', snapshot => {
-                const withdrawals = snapshot.val() || {};
-                pendingWithdrawals.textContent = Object.values(withdrawals).filter(w => w.status === 'pending').length;
-            });
-            database.ref('requests/ucPurchases').on('value', snapshot => {
-                const ucRequests = snapshot.val() || {};
-                pendingUcRequests.textContent = Object.values(ucRequests).filter(r => r.status === 'pending').length;
-            });
-        }
-
-        function loadDashboard() {
-            listenToData();
-        }
-
-        function loadUsers() {
-            usersTableBody.innerHTML = '';
-            database.ref('users').once('value', snapshot => {
-                const users = snapshot.val() || {};
-                Object.entries(users).forEach(([uid, user]) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${uid}</td>
-                        <td>${user.name || 'N/A'}</td>
-                        <td>${user.email || 'N/A'}</td>
-                        <td>${parseInt(user.balance) || 0}</td> <!-- Updated to balance -->
-                        <td>
-                            <button class="btn btn-secondary btn-small" onclick="addBalance('${uid}')"><i class="fas fa-plus"></i></button>
-                            <button class="btn btn-accent btn-small" onclick="removeBalance('${uid}')"><i class="fas fa-minus"></i></button>
-                        </td>
-                    `;
-                    usersTableBody.appendChild(row);
-                });
-            });
-        }
-
-        function searchUsers() {
-            const query = userSearch.value.trim().toLowerCase();
-            usersTableBody.innerHTML = '';
-            database.ref('users').once('value', snapshot => {
-                const users = snapshot.val() || {};
-                Object.entries(users).forEach(([uid, user]) => {
-                    if (uid.toLowerCase().includes(query) || (user.name && user.name.toLowerCase().includes(query))) {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${uid}</td>
-                            <td>${user.name || 'N/A'}</td>
-                            <td>${user.email || 'N/A'}</td>
-                            <td>${parseInt(user.balance) || 0}</td> <!-- Updated to balance -->
-                            <td>
-                                <button class="btn btn-secondary btn-small" onclick="addBalance('${uid}')"><i class="fas fa-plus"></i></button>
-                                <button class="btn btn-accent btn-small" onclick="removeBalance('${uid}')"><i class="fas fa-minus"></i></button>
-                            </td>
-                        `;
-                        usersTableBody.appendChild(row);
-                    }
-                });
-            });
-        }
-
-        function loadTransactions() {
-            transactionsTableBody.innerHTML = '';
-            database.ref('users').once('value', snapshot => {
-                const users = snapshot.val() || {};
-                Object.values(users).forEach(user => {
-                    if (user.transactions) {
-                        Object.values(user.transactions).forEach(transaction => {
-                            const row = document.createElement('tr');
-                            const date = new Date(transaction.timestamp).toLocaleString();
-                            row.innerHTML = `
-                                <td>${transaction.id}</td>
-                                <td>${user.email || 'N/A'}</td>
-                                <td>${transaction.description}</td>
-                                <td>${transaction.amount}</td>
-                                <td>${transaction.type}</td>
-                                <td>${date}</td>
-                            `;
-                            transactionsTableBody.appendChild(row);
-                        });
-                    }
-                });
-            });
-        }
-
-        function loadWithdrawals() {
-            withdrawalsTableBody.innerHTML = '';
-            database.ref('requests/withdrawals').once('value', snapshot => {
-                const withdrawals = snapshot.val() || {};
-                Object.entries(withdrawals).forEach(([id, withdrawal]) => {
-                    const row = document.createElement('tr');
-                    const date = new Date(withdrawal.timestamp).toLocaleString();
-                    row.innerHTML = `
-                        <td>${id}</td>
-                        <td>${withdrawal.username}</td>
-                        <td>${withdrawal.upiId}</td>
-                        <td>${withdrawal.amount}</td>
-                        <td>${withdrawal.status}</td>
-                        <td>${date}</td>
-                        <td>
-                            <button class="btn btn-secondary btn-small" onclick="approveWithdrawal('${id}')"><i class="fas fa-check"></i></button>
-                            <button class="btn btn-accent btn-small" onclick="rejectWithdrawal('${id}')"><i class="fas fa-times"></i></button>
-                        </td>
-                    `;
-                    withdrawalsTableBody.appendChild(row);
-                });
-            });
-        }
-
-        function loadUcPurchases() {
-            ucPurchasesTableBody.innerHTML = '';
-            database.ref('requests/ucPurchases').once('value', snapshot => {
-                const ucRequests = snapshot.val() || {};
-                Object.entries(ucRequests).forEach(([id, request]) => {
-                    const row = document.createElement('tr');
-                    const date = new Date(request.timestamp).toLocaleString();
-                    row.innerHTML = `
-                        <td>${id}</td>
-                        <td>${request.userId}</td>
-                        <td>${request.gameId}</td>
-                        <td>${request.ucAmount}</td>
-                        <td>${request.coinCost}</td>
-                        <td>${request.status}</td>
-                        <td>${date}</td>
-                        <td>
-                            <button class="btn btn-secondary btn-small" onclick="approveUcPurchase('${id}')"><i class="fas fa-check"></i></button>
-                            <button class="btn btn-accent btn-small" onclick="rejectUcPurchase('${id}')"><i class="fas fa-times"></i></button>
-                        </td>
-                    `;
-                    ucPurchasesTableBody.appendChild(row);
-                });
-            });
-        }
-
-        function loadSettings() {
-            database.ref('settings').once('value', snapshot => {
-                const settings = snapshot.val() || { minWithdrawal: 50, ucRate: 10 };
-                minWithdrawal.value = settings.minWithdrawal;
-                ucRate.value = settings.ucRate;
-            });
-        }
-
-        function addBalance(uid) {
-            const amount = prompt('Enter amount of balance to add:');
-            if (amount && !isNaN(amount) && amount > 0) {
-                database.ref(`users/${uid}/balance`).transaction(current => (parseInt(current) || 0) + parseInt(amount)); // Updated to balance
-                alert(`Added ${amount} balance to ${uid}`);
-            }
-        }
-
-        function removeBalance(uid) {
-            const amount = prompt('Enter amount of balance to remove:');
-            if (amount && !isNaN(amount) && amount > 0) {
-                database.ref(`users/${uid}/balance`).transaction(current => (parseInt(current) || 0) - parseInt(amount) >= 0 ? (parseInt(current) || 0) - parseInt(amount) : 0); // Updated to balance
-                alert(`Removed ${amount} balance from ${uid}`);
-            }
-        }
-
-        function approveWithdrawal(id) {
-            if (confirm('Approve this withdrawal?')) {
-                database.ref(`requests/withdrawals/${id}`).update({ status: 'approved' });
-                alert(`Withdrawal ${id} approved`);
-            }
-        }
-
-        function rejectWithdrawal(id) {
-            if (confirm('Reject this withdrawal?')) {
-                database.ref(`requests/withdrawals/${id}`).update({ status: 'rejected' });
-                alert(`Withdrawal ${id} rejected`);
-            }
-        }
-
-        function approveUcPurchase(id) {
-            if (confirm('Approve this UC purchase?')) {
-                database.ref(`requests/ucPurchases/${id}`).update({ status: 'approved' });
-                alert(`UC Purchase ${id} approved`);
-            }
-        }
-
-        function rejectUcPurchase(id) {
-            if (confirm('Reject this UC purchase?')) {
-                database.ref(`requests/ucPurchases/${id}`).update({ status: 'rejected' });
-                alert(`UC Purchase ${id} rejected`);
-            }
-        }
-
-        function saveMinWithdrawalSetting() {
-            const value = parseInt(minWithdrawal.value);
-            if (!isNaN(value) && value >= 0) {
-                database.ref('settings').update({ minWithdrawal: value });
-                alert('Minimum withdrawal updated');
-            }
-        }
-
-        function saveUcRateSetting() {
-            const value = parseInt(ucRate.value);
-            if (!isNaN(value) && value > 0) {
-                database.ref('settings').update({ ucRate: value });
-                alert('UC rate updated');
-            }
-        }
-
-        function logout() {
-            auth.signOut().then(() => window.location.href = 'index.html');
-        }
-
-        document.querySelector('[data-section="logout"]').addEventListener('click', logout);
-    </script>
     <style>
-        /* Admin Panel Styles */
-        .admin-container {
-            display: flex;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #ff6b6b;
+            --success: #1dd1a1;
+            --dark: #0f1419;
+            --darker: #0a0e14;
+            --light: #f5f6fa;
+            --card-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
             min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--dark);
-            color: var(--light);
-            padding: 20px 0;
-            position: fixed;
-            height: 100%;
-            transition: transform 0.3s ease, width 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-100%);
-            width: 0;
-        }
-
-        .sidebar .logo {
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 12px;
-            padding: 0 20px 20px;
-            border-bottom: 1px solid rgba(236, 240, 241, 0.1);
-        }
-
-        .sidebar .logo i {
-            font-size: 24px;
-            color: var(--secondary);
-        }
-
-        .sidebar .logo h2 {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 10px;
-            position: absolute;
-            top: 20px;
-            right: -50px;
-            z-index: 1001;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: var(--light);
-            text-decoration: none;
-            transition: background 0.3s ease;
-            font-size: 16px;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: rgba(52, 152, 219, 0.2);
-        }
-
-        .nav-item i {
-            margin-right: 12px;
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .main-content {
-            margin-left: 250px;
             padding: 20px;
-            width: calc(100% - 250px);
-            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
-            transition: margin-left 0.3s ease, width 0.3s ease;
+            line-height: 1.6;
         }
 
-        .main-content.sidebar-collapsed {
-            margin-left: 0;
+        .container {
+            max-width: 1200px;
             width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            animation: fadeIn 1s ease;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--header-bg);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        header h1 {
-            font-size: 24px;
-            color: var(--light);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info #adminEmail {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 14px;
-        }
-
-        .admin-section {
-            display: none;
-        }
-
-        .admin-section.active {
-            display: block;
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        .card h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            color: var(--light);
-            font-size: 18px;
+        .card:hover {
+            transform: translateY(-5px);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: var(--input-bg);
-            padding: 15px;
-            border-radius: 10px;
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 30px;
             text-align: center;
-        }
-
-        .stat-card i {
-            font-size: 24px;
-            color: var(--secondary);
-            margin-bottom: 10px;
-        }
-
-        .stat-card h4 {
-            font-size: 14px;
-            color: rgba(236, 240, 241, 0.8);
-        }
-
-        .stat-card p {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--light);
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .search-bar input {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            background: var(--input-bg);
-            color: var(--light);
-            font-size: 14px;
-        }
-
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--input-bg);
-            border-radius: 10px;
+            position: relative;
             overflow: hidden;
         }
 
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--light);
-            font-size: 14px;
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
         }
 
-        th {
-            background: var(--dark);
-            position: sticky;
-            top: 0;
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 12px;
-            min-width: 40px;
-            height: 40px;
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+            animation: bounce 2s infinite;
         }
 
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
+        .app-icon i {
+            font-size: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .app-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .download-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 40px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.3rem;
+            box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            animation: pulse 2s infinite;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(106, 17, 203, 0.5);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .download-btn:hover::after {
+            left: 100%;
+        }
+
+        .download-btn i {
+            font-size: 1.5rem;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--light);
+            opacity: 0.8;
+        }
+
+        .info-item i {
+            color: var(--success);
+        }
+
+        .description {
+            margin-bottom: 30px;
+        }
+
+        .description h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .description p {
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .feature i {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .social-section {
+            margin-top: 30px;
+        }
+
+        .social-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .social-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .social-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .social-feature:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .social-feature i {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .earn-section {
+            margin-top: 30px;
+        }
+
+        .earn-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .earn-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .earn-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .earn-feature:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .earn-feature i {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .screenshot {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.05);
+        }
+
+        .screenshot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .screenshot i {
+            font-size: 2rem;
+            z-index: 2;
+            position: relative;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 30px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .app-title {
+                font-size: 1.8rem;
             }
-            .sidebar {
-                width: 200px;
-                transform: translateX(-100%);
+            
+            .content {
+                padding: 20px;
             }
-            .sidebar.collapsed {
-                transform: translateX(0);
+            
+            .download-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
             }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 10px;
-            }
-            header {
-                padding: 10px;
-            }
-            header h1 {
-                font-size: 20px;
-            }
-            .stats-grid {
+            
+            .features, .social-features, .earn-features {
                 grid-template-columns: 1fr;
             }
-            .card h3 {
-                font-size: 16px;
-            }
-            .search-bar input {
-                font-size: 12px;
-                padding: 8px;
-            }
-            table {
-                font-size: 12px;
-            }
-            .btn-small {
-                padding: 4px 8px;
-                min-width: 35px;
-                height: 35px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .user-info {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-            }
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            .stat-card p {
-                font-size: 16px;
+            
+            .screenshots {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="app-header">
+                <div class="app-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h1 class="app-title">RN WR2</h1>
+                <p class="app-subtitle">Earn Money & Connect Socially</p>
+            </div>
+            
+            <div class="content">
+                <div class="download-section">
+                    <a href="https://github.com/Devlovpraja07/Devlovp_Raja07/releases/download/Apk/base.apk" class="download-btn" id="downloadBtn">
+                        <i class="fas fa-download"></i>
+                        Download APK
+                    </a>
+                    
+                    <div class="file-info">
+                        <div class="info-item">
+                            <i class="fas fa-database"></i>
+                            <span>Size: 42.5 MB</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-star"></i>
+                            <span>Rating: 4.7/5</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-download"></i>
+                            <span>Downloads: 50K+</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>100% Safe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="description">
+                    <h2><i class="fas fa-info-circle"></i> App Description</h2>
+                    <p>RN WR2 is a revolutionary app that combines social networking with money-making opportunities. Connect with friends, share content, and earn real money through various activities.</p>
+                    <p>With a sleek design and intuitive interface, RN WR2 makes it easy to navigate between social features and earning opportunities.</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-bolt"></i>
+                            <span>Fast Performance</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Optimized for Mobile</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-paint-brush"></i>
+                            <span>Beautiful UI</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-language"></i>
+                            <span>Multi-language</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="social-section">
+                    <h2><i class="fas fa-users"></i> Social Features</h2>
+                    <div class="social-features">
+                        <div class="social-feature">
+                            <i class="fas fa-comment"></i>
+                            <span>Chat & Messaging</span>
+                        </div>
+                        <div class="social-feature">
+                            <i class="fas fa-photo-video"></i>
+                            <span>Media Sharing</span>
+                        </div>
+                        <div class="social-feature">
+                            <i class="fas fa-user-friends"></i>
+                            <span>Friend Connections</span>
+                        </div>
+                        <div class="social-feature">
+                            <i class="fas fa-hashtag"></i>
+                            <span>Trending Topics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="content">
+                <div class="earn-section">
+                    <h2><i class="fas fa-money-bill-wave"></i> Earning Features</h2>
+                    <p>RN WR2 offers multiple ways to earn real money directly from your smartphone. Complete simple tasks and watch your earnings grow!</p>
+                    
+                    <div class="earn-features">
+                        <div class="earn-feature">
+                            <i class="fas fa-tasks"></i>
+                            <span>Complete Tasks</span>
+                        </div>
+                        <div class="earn-feature">
+                            <i class="fas fa-ad"></i>
+                            <span>Watch Ads</span>
+                        </div>
+                        <div class="earn-feature">
+                            <i class="fas fa-gamepad"></i>
+                            <span>Play Games</span>
+                        </div>
+                        <div class="earn-feature">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Refer Friends</span>
+                        </div>
+                        <div class="earn-feature">
+                            <i class="fas fa-poll"></i>
+                            <span>Surveys</span>
+                        </div>
+                        <div class="earn-feature">
+                            <i class="fas fa-video"></i>
+                            <span>Video Rewards</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="screenshots">
+                    <div class="screenshot">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="screenshot">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="screenshot">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="screenshot">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                
+                <div class="description">
+                    <h2><i class="fas fa-gem"></i> Premium Benefits</h2>
+                    <p>RN WR2 offers exclusive benefits to active users including higher earning rates, premium content, and priority support.</p>
+                    
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-crown"></i>
+                            <span>Premium Rewards</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-gift"></i>
+                            <span>Daily Bonuses</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-rocket"></i>
+                            <span>Faster Withdrawals</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-headset"></i>
+                            <span>Priority Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <p>© 2023 RN WR2 | All features are available after installation</p>
+                    <p>This app is 100% free to download and use</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Download button animation
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        downloadBtn.addEventListener('click', function(e) {
+            // Only add animation if it's not already downloading
+            if (!this.classList.contains('downloading')) {
+                e.preventDefault();
+                
+                // Change button text and style
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+                this.style.background = 'linear-gradient(45deg, #ff6b6b, #ff8e8e)';
+                this.style.boxShadow = '0 10px 20px rgba(255, 107, 107, 0.3)';
+                this.classList.remove('pulse');
+                this.classList.add('downloading');
+                
+                // Actually start the download after a brief animation
+                setTimeout(() => {
+                    window.location.href = this.href;
+                    
+                    // Reset button after 3 seconds (in case download doesn't start)
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                        this.style.background = 'linear-gradient(45deg, var(--primary), var(--secondary))';
+                        this.style.boxShadow = '0 10px 20px rgba(106, 17, 203, 0.3)';
+                        this.classList.add('pulse');
+                        this.classList.remove('downloading');
+                    }, 3000);
+                }, 1500);
+            }
+        });
+        
+        // Add animation to features on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all features and social features
+        document.querySelectorAll('.feature, .social-feature, .earn-feature').forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(item);
+        });
+    </script>
 </body>
 </html>
