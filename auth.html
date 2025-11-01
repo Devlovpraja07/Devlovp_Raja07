@@ -1,23 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>GitHub Auth Handler</title>
-  <style>
-    body{font-family:system-ui;background:#0d1117;color:#c9d1d9;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column}
-    img{border-radius:50%}
-  </style>
+  <title>GitHub Auth</title>
 </head>
 <body>
-  <h2 id="status">Completing sign in…</h2>
-  <div id="content"></div>
+  <p>Connecting...</p>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-  <script>
-    // --------- REPLACE with your Firebase config (from the JSON you shared) ----------
     const firebaseConfig = {
       apiKey: "AIzaSyC3_hr1PPPiprghSQy8KkPndK8FV6g_yyY",
       authDomain: "rn-gfx.firebaseapp.com",
@@ -25,96 +19,49 @@
       projectId: "rn-gfx",
       storageBucket: "rn-gfx.firebasestorage.app",
       messagingSenderId: "426859283244",
-      appId: "1:426859283244:android:e96227c41057cc35c2a289" // it's fine to use mobile app id here
+      appId: "1:426859283244:web:authhtml"
     };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    async function run() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      if (!code) {
-        document.getElementById('status').textContent = 'No code found in URL.';
-        return;
-      }
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-      document.getElementById('status').textContent = 'Exchanging code for token (securely)…';
-
-      try {
-        // Call serverless endpoint /api/exchange (we'll create this file below)
-        const resp = await fetch('/api/exchange', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ code })
-        });
-
-        const tokenData = await resp.json();
-
-        if (!resp.ok) {
-          document.getElementById('status').textContent = 'Token exchange failed: ' + (tokenData.error || resp.status);
-          console.error(tokenData);
-          return;
-        }
-
-        if (!tokenData.access_token) {
-          document.getElementById('status').textContent = 'No access token returned';
-          console.error(tokenData);
-          return;
-        }
-
-        const accessToken = tokenData.access_token;
-        document.getElementById('status').textContent = 'Fetching GitHub user…';
-
-        const userRes = await fetch('https://api.github.com/user', {
-          headers: { Authorization: 'Bearer ' + accessToken }
-        });
-        const user = await userRes.json();
-
-        if (!user || !user.login) {
-          document.getElementById('status').textContent = 'Failed to fetch GitHub user';
-          console.error(user);
-          return;
-        }
-
-        document.getElementById('status').textContent = 'Saving user to Firebase…';
-
-        // Create a user object to save
-        const userData = {
-          github_login: user.login || null,
-          github_id: user.id || null,
-          name: user.name || null,
-          avatar: user.avatar_url || null,
-          html_url: user.html_url || null,
-          email: user.email || null,
-          access_scopes: tokenData.scope || null,
-          logged_at: (new Date()).toISOString()
-        };
-
-        // Save under /github_users/{github_id}
-        const userKey = user.id ? String(user.id) : user.login;
-        await db.ref('github_users/' + userKey).set(userData);
-
-        // Show success and user data
-        document.getElementById('content').innerHTML = `
-          <h3>Welcome, ${user.login} ✅</h3>
-          <img src="${user.avatar_url}" width="120" alt="avatar"/>
-          <p>${user.name ? user.name + '<br>' : ''}<a href="${user.html_url}" target="_blank">View GitHub profile</a></p>
-          <p style="font-size:0.85rem;color:lightgray">Saved to Firebase at <code>/github_users/${userKey}</code></p>
-        `;
-        document.getElementById('status').textContent = 'Signed in';
-
-        // Optional: redirect to Android app deep link with token
-        // window.location.href = `yourapp://callback?token=${accessToken}&login=${encodeURIComponent(user.login)}`;
-
-      } catch (err) {
-        console.error(err);
-        document.getElementById('status').textContent = 'Something went wrong';
-      }
+    async function exchangeCodeForToken(code) {
+      const res = await fetch("/api/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+      return res.json();
     }
 
-    run();
+    async function getUserData(token) {
+      const res = await fetch("https://api.github.com/user", {
+        headers: { Authorization: `token ${token}` }
+      });
+      return res.json();
+    }
+
+    if (code) {
+      const tokenData = await exchangeCodeForToken(code);
+      const user = await getUserData(tokenData.access_token);
+
+      await set(ref(db, "github_users/" + user.id), {
+        id: user.id,
+        name: user.name || user.login,
+        username: user.login,
+        avatar: user.avatar_url,
+        url: user.html_url,
+        time: new Date().toISOString()
+      });
+
+      // ✅ Send user data back to Android app via deep link
+      window.location.href = `yourapp://callback?user=${encodeURIComponent(JSON.stringify(user))}`;
+    } else {
+      document.body.innerHTML = "<p>GitHub login failed.</p>";
+    }
   </script>
 </body>
 </html>
