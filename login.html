@@ -3,16 +3,15 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Login with GitHub</title>
+  <title>GitHub Login</title>
 </head>
 <body style="font-family:system-ui;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh">
-  <h2>Login with GitHub</h2>
+  <h2>GitHub Login</h2>
   <button id="login">Login with GitHub</button>
 
   <script>
-    const CLIENT_ID = "Ov23lisRwic3z0VX2i71"; // <- Put your GitHub Client ID here
-    // Replace yourdomain.vercel.app with your real deployed domain
-    const REDIRECT_URI = encodeURIComponent("https://yourdomain.vercel.app/auth.html");
+    const CLIENT_ID = "Ov23lisRwic3z0VX2i71"; // GitHub Client ID
+    const REDIRECT_URI = encodeURIComponent("https://your-vercel-project-name.vercel.app/auth.html");
 
     document.getElementById('login').onclick = () => {
       const url = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=user&redirect_uri=${REDIRECT_URI}`;
