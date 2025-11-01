@@ -9,6 +9,7 @@
   <p>Connecting...</p>
 
   <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
@@ -25,14 +26,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    const CLIENT_ID = "Ov23lisRwic3z0VX2i71";
+    const CLIENT_SECRET = "cf47ca1bcb383b81ddefc16996f0f0626e8fa5c9";
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
 
     async function exchangeCodeForToken(code) {
-      const res = await fetch("/api/exchange", {
+      const res = await fetch("https://github.com/login/oauth/access_token", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code })
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+          code
+        })
       });
       return res.json();
     }
@@ -44,24 +51,37 @@
       return res.json();
     }
 
-    if (code) {
-      const tokenData = await exchangeCodeForToken(code);
-      const user = await getUserData(tokenData.access_token);
+    async function main() {
+      if (!code) {
+        document.body.innerHTML = "<p>No code found.</p>";
+        return;
+      }
 
-      await set(ref(db, "github_users/" + user.id), {
-        id: user.id,
-        name: user.name || user.login,
-        username: user.login,
-        avatar: user.avatar_url,
-        url: user.html_url,
-        time: new Date().toISOString()
-      });
+      try {
+        const tokenData = await exchangeCodeForToken(code);
+        const token = tokenData.access_token;
+        const user = await getUserData(token);
 
-      // ✅ Send user data back to Android app via deep link
-      window.location.href = `yourapp://callback?user=${encodeURIComponent(JSON.stringify(user))}`;
-    } else {
-      document.body.innerHTML = "<p>GitHub login failed.</p>";
+        // ✅ Save to Firebase
+        await set(ref(db, "github_users/" + user.id), {
+          id: user.id,
+          name: user.name || user.login,
+          username: user.login,
+          avatar: user.avatar_url,
+          profile_url: user.html_url,
+          email: user.email || "hidden",
+          time: new Date().toISOString()
+        });
+
+        // ✅ Redirect to your Android app
+        window.location.href = `yourapp://callback?user=${encodeURIComponent(JSON.stringify(user))}`;
+      } catch (e) {
+        document.body.innerHTML = "<p>Error connecting to GitHub.</p>";
+        console.error(e);
+      }
     }
+
+    main();
   </script>
 </body>
 </html>
