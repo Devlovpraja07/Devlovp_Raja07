@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Login with GitHub</title>
+</head>
+<body>
+  <h2>Login with GitHub</h2>
+  <button id="login">Login with GitHub</button>
+
+  <script>
+    const clientId = "YOUR_CLIENT_ID"; // from GitHub
+    const redirect = encodeURIComponent("https://yourdomain.vercel.app/auth.html");
+    document.getElementById("login").onclick = () => {
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=user&redirect_uri=${redirect}`;
+    };
+  </script>
+</body>
+</html>
