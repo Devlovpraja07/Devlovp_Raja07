@@ -1,93 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GitHub Auth Redirect</title>
+  <meta charset="UTF-8">
+  <title>GitHub OAuth Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      flex-direction: column;
       background: #0d1117;
       color: #c9d1d9;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
     }
-    .loader {
-      border: 5px solid #2f363d;
-      border-top: 5px solid #58a6ff;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    h2 { color: #58a6ff; }
+    .loading { animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
     }
   </style>
 </head>
 <body>
-  <div class="loader"></div>
-  <h2>Signing in with GitHub...</h2>
+  <h2>Authenticating with GitHub...</h2>
+  <p class="loading">Please wait ⏳</p>
+
   <script>
-    // 👇 Replace these with your actual GitHub App credentials
-    const client_id = "YOUR_CLIENT_ID";
-    const client_secret = "YOUR_CLIENT_SECRET";
+    const client_id = "Ov23lisRwic3z0VX2i71";  // 🔹 Replace with your GitHub Client ID
+    const client_secret = "f3c5bded916ae2c297256324a40da73a902a0937";  // 🔹 Replace with your Client Secret
 
-    // Extract the code parameter from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
+    async function handleAuth() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
 
-    if (!code) {
-      document.body.innerHTML = "<h2>Authorization code not found.</h2>";
-    } else {
-      // Exchange the code for an access token
-      fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          client_id,
-          client_secret,
-          code
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
+      if (!code) {
+        document.body.innerHTML = "<h2 style='color:red'>Error: No code parameter found.</h2>";
+        return;
+      }
+
+      try {
+        const response = await fetch("https://github.com/login/oauth/access_token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            client_id: client_id,
+            client_secret: client_secret,
+            code: code
+          })
+        });
+
+        const data = await response.json();
+
         if (data.access_token) {
-          // ✅ Got token — store or redirect
-          console.log("Access Token:", data.access_token);
-          localStorage.setItem("github_access_token", data.access_token);
-
-          // Optionally fetch user data
-          return fetch("https://api.github.com/user", {
-            headers: {
-              Authorization: "Bearer " + data.access_token
-            }
-          });
+          // ✅ Send access token back to Android App
+          window.location.href = "yourapp://callback?code=" + code + "&token=" + data.access_token;
         } else {
-          throw new Error("No access token returned");
+          document.body.innerHTML = "<h2 style='color:red'>Error: Access token not received.</h2><p>" + JSON.stringify(data) + "</p>";
         }
-      })
-      .then(res => res.json())
-      .then(user => {
-        document.body.innerHTML = `
-          <h2>Welcome, ${user.login} 🎉</h2>
-          <img src="${user.avatar_url}" width="100" style="border-radius:50%">
-          <p><a href="${user.html_url}" target="_blank">View GitHub Profile</a></p>
-        `;
-      })
-      .catch(err => {
-        console.error(err);
-        document.body.innerHTML = "<h2>Something went wrong during authentication.</h2>";
-      });
+      } catch (err) {
+        document.body.innerHTML = "<h2 style='color:red'>Something went wrong during authentication.</h2><p>" + err.message + "</p>";
+      }
     }
+
+    handleAuth();
   </script>
 </body>
 </html>
